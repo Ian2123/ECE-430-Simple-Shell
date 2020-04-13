@@ -81,11 +81,11 @@ void helpcmd(char *cmd)
 	{
 		printf("\nexit:\tEnds the experience of working in the new shell\n");
 	}
-   else if (strcmp(cmd,"set_scheduling")==0)
-   {
-   	printf("\nset_scheduling policy:\tWill change how the scheduler operates with process execution\n");
-      printf("policy: FCFS, SJF, MFQ, or RR\n");
-   }
+        else if (strcmp(cmd,"set_scheduling")==0)
+        {
+   	        printf("\nset_scheduling policy:\tWill change how the scheduler operates with process execution\n");
+                printf("policy: FCFS, SJF, MFQ, or RR\n");
+        }
 	else 
 		printf("\nNo Such command. Type help to see a list of commands\n");
 }
@@ -106,7 +106,8 @@ void ver()
 	Function:    ps()
 	Arguments:   NONE
 	Description: This function will display the pid and name all living processes to the user.
-					 This function will not work as intended for MFQ scheduling
+		     This function will not work as intended for MFQ scheduling due to the nature 
+		     of the scheduling policy.
 */
 void ps() 
 {
@@ -121,7 +122,7 @@ void ps()
 
 
 /*
-	Function:	 mykill(int)
+	Function:    mykill(int)
 	Arguments:   int pid
 	Description: This function will terminate the process with the given pid
 */
@@ -133,19 +134,19 @@ void mykill(int pid)
 
 
 /*
-	Function:	 exec(char*)
+	Function:    exec(char*)
 	Arguments:   char* input
 	Description: This function will execute the given program by forking a child and
-					 binding it to the executable with execv(). This function supports
-					 FCFS, RR, SJF, and MFQ scheduling of its active processes. 
+		     binding it to the executable with execv(). This function supports
+		     FCFS, RR, SJF, and MFQ scheduling of its active processes. 
 	
 	ps: Not to be confused with the exec command of the shell which takes as inputs
-		 the number of prints and a time quantum for the p-shell program
+	    the number of prints and a time quantum for the p-shell program
 */
 void exec(char *input) 
 {
 	int i, t, c_pid;
-   char c_name[10];
+        char c_name[10];
 	char *args[10];
 	char *temp;
 	struct queue *qp;
@@ -169,116 +170,116 @@ void exec(char *input)
    {
 	   if ((t=fork())==0)
 	   {
-			execv(args[0],args);
+		execv(args[0],args);
 	   }
 	   enqueue(t,args[0],&pid_list);
 
-      usleep(10000); //safe delay
+	   usleep(10000); //safe delay
 
 	   if (args[i-1]!=NULL) //If & argument not given
 	   {
-         fg_pid=t;
-			kill(t,SIGCONT);
-			while(fg_pid != 0 && fg_suspended != 1)
-         {
-				pause();
-			}
+		   fg_pid=t;
+		   kill(t,SIGCONT);
+		   while(fg_pid != 0 && fg_suspended != 1)
+         	   {
+			pause();
+		   }
 	   }
-      else
-      	kill(t,SIGCONT);
-	}
-   else if(strcmp(policy,"RR") == 0) /** Round Robin Scheduling **/
-  	{
-	   if((t=fork())==0)
-		{
-			execv(args[0],args);
-		}
-		else
-		{
-			enqueue(t,args[0],&pid_list);
-			p_count++;
-			if(p_count != argnum) //create all processes before executing any
-			{
-			   return;
-			}
-		}
-      usleep(10000); //safe delay
-
-		while(pid_list.head != pid_list.tail)
-		{
-			kill(pid_list.head->next->pid, SIGCONT);
-         usleep(qt);
-
-			if(!done)
-      	{
-         	kill(pid_list.head->next->pid, SIGTSTP);
-         	usleep(1000); //safe delay;
-
-         	c_pid = pid_list.head->next->pid;
-				strcpy(c_name, pid_list.head->next->name);
-         	dequeue(&pid_list);
-         	enqueue(c_pid, c_name, &pid_list);
-      	}
-      	else
-      	{
-         	done = 0;
-      	}
-			usleep(1000); //safe delay
-		}
-    	p_count = 0;
-		dequeue(&pid_list);
-		enqueue(getppid(),"NEW SHELL",&pid_list);
+	   else
+		   kill(t,SIGCONT);
    }
-  	else if(strcmp(policy,"MFQ") == 0) /** Multi-Level Feedback Queue Scheduling **/
+   else if(strcmp(policy,"RR") == 0) /** Round Robin Scheduling **/
    {
-		int dead;
-
-		if((t=fork())==0)
-		{
-			execv(args[0],args);
-		}
-		else
-		{
-			enqueue(t, args[0], pid_list.next);
-			p_count++;
-			if(p_count != argnum) //create all processes before executing
-			{
+	   if((t=fork())==0)
+	   {
+		   execv(args[0],args);
+	   }
+	   else
+	   {
+		   enqueue(t,args[0],&pid_list);
+		   p_count++;
+		   if(p_count != argnum) //create all processes before executing any
+		   {
 			   return;
-			}
-		}
-      usleep(1000); //safe delay
+		   }
+	   }
+	   usleep(10000); //safe delay
 
-		for(qp = pid_list.next; qp->head != NULL; qp = qp->next)
-		{
-			while(qp->head != NULL)
-			{
-				kill(qp->head->pid, SIGCONT);
-         	usleep(qt);
+	   while(pid_list.head != pid_list.tail)
+	   {
+		   kill(pid_list.head->next->pid, SIGCONT);
+		   usleep(qt);
 
-         	if(!done)
-         	{
-            	kill(qp->head->pid, SIGTSTP);
-            	usleep(1000); //safe delay;
+		   if(!done)
+		   {
+			   kill(pid_list.head->next->pid, SIGTSTP);
+			   usleep(1000); //safe delay;
 
-            	c_pid = qp->head->pid;
-					strcpy(c_name, qp->head->name);
-            	dequeue(qp);
-					if(qp->next != NULL)
-            		enqueue(c_pid, c_name, qp->next); //Move child to low prio queue
-					else
-						enqueue(c_pid, c_name, qp); //Move child to back of current queue
-         	}
-         	else
-				{
-            	done = 0;
-					dead++;
-				}
-			}
-			if(dead == p_count) break;
-		}
-		p_count = 0;
-		usleep(1000); //safe delay
-	}
+			   c_pid = pid_list.head->next->pid;
+			   strcpy(c_name, pid_list.head->next->name);
+			   dequeue(&pid_list);
+			   enqueue(c_pid, c_name, &pid_list);
+		   }
+		   else
+		   {
+			   done = 0;
+		   }
+		   usleep(1000); //safe delay
+	   }
+	   p_count = 0;
+	   dequeue(&pid_list);
+	   enqueue(getppid(),"NEW SHELL",&pid_list);
+   }
+   else if(strcmp(policy,"MFQ") == 0) /** Multi-Level Feedback Queue Scheduling **/
+   {
+	   int dead;
+
+	   if((t=fork())==0)
+	   {
+		   execv(args[0],args);
+	   }
+	   else
+	   {
+		   enqueue(t, args[0], pid_list.next);
+		   p_count++;
+		   if(p_count != argnum) //create all processes before executing
+		   {
+			   return;
+		   }
+	   }
+	   usleep(1000); //safe delay
+
+	   for(qp = pid_list.next; qp->head != NULL; qp = qp->next)
+	   {
+		   while(qp->head != NULL)
+		   {
+			   kill(qp->head->pid, SIGCONT);
+			   usleep(qt);
+
+			   if(!done)
+			   {
+				   kill(qp->head->pid, SIGTSTP);
+				   usleep(1000); //safe delay;
+
+				   c_pid = qp->head->pid;
+				   strcpy(c_name, qp->head->name);
+				   dequeue(qp);
+				   if(qp->next != NULL)
+					   enqueue(c_pid, c_name, qp->next); //Move child to low prio queue
+				   else
+					   enqueue(c_pid, c_name, qp); //Move child to back of current queue
+			   }
+			   else
+			   {
+				   done = 0;
+				   dead++;
+			   }
+		   }
+		   if(dead == p_count) break;
+	   }
+	   p_count = 0;
+	   usleep(1000); //safe delay
+   }
    else if(strcmp(policy,"SJF") == 0) /** Shortest Job First Scheduling **/
    {
 	   if ((t=fork())==0)
