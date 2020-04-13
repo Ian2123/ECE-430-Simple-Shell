@@ -2,15 +2,15 @@
 	Author: 		 Ian Isely 
 	Date: 		 3/25/20
 	Description: This program is a simple shell with support for a list of commands
-					 located under help. The highlights of this shell are the set_scheduling
-					 and exec commands. The exec command will execute the program p compiled
-				    from the file p-shell.c which just prints a given amount of times. The
-					 set_scheduling command allows the user to change the scheduling policy
-					 of processes to either First Come First Serve (FCFS), Round Robin (RR), 
-					 Multi-Level Feedback Queue (MFQ), or Preemptive Shortest Job First (SJF).
+		     located under help. The highlights of this shell are the set_scheduling
+		     and exec commands. The exec command will execute the program p compiled
+		     from the file p-shell.c which just prints a given amount of times. The
+		     set_scheduling command allows the user to change the scheduling policy
+		     of processes to either First Come First Serve (FCFS), Round Robin (RR), 
+		     Multi-Level Feedback Queue (MFQ), or Preemptive Shortest Job First (SJF).
 
 	Contributers: Dr. Iraklis Anagnostopoulos (Provided everything but: set_scheduling
-					  command, MFQ, RR, SJF, and anything associated with such policies)
+		      command, MFQ, RR, SJF, and anything associated with such policies)
 */
 
 #include <stdio.h>
