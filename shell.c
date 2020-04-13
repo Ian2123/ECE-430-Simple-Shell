@@ -1,6 +1,6 @@
 /*
-	Author: 		 Ian Isely 
-	Date: 		 3/25/20
+	Author: Ian Isely 
+	Date: 3/25/20
 	Description: This program is a simple shell with support for a list of commands
 		     located under help. The highlights of this shell are the set_scheduling
 		     and exec commands. The exec command will execute the program p compiled
